@@ -30,7 +30,6 @@ public class Canvas extends JFrame {
     private static ImageIcon boardImage = new ImageIcon("grey_board.png");
 
 
-
     private static Random random = new Random();
 
     private static int UDP_PORT = 4444;
@@ -201,7 +200,6 @@ public class Canvas extends JFrame {
         }
 
     }
-
 
 
     private class Board extends JPanel implements Runnable {
@@ -677,7 +675,7 @@ public class Canvas extends JFrame {
 
                                 statusLabel.setText(WATCH_MESSAGE);
 
-                                while(true) {
+                                while (true) {
                                     if (finished()) {
                                         return;
                                     }
