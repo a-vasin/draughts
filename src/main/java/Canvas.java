@@ -474,7 +474,6 @@ public class Canvas extends JFrame {
                             try {
                                 peer = serverSocket.accept();
                                 System.out.println("Received connection from :" + peer.getInetAddress().getHostAddress());
-                                announcer.interrupt();
                                 if (isMyMove)
                                     statusLabel.setText(MY_MOVE_MESSAGE);
                                 else
