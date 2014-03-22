@@ -45,6 +45,7 @@ public class Canvas extends JFrame {
     private static String WAIT_MESSAGE = "Waiting for connection...";
     private static String FIND_MESSAGE = "Looking for server...";
     private static String WATCH_MESSAGE = "Watching game";
+    private static String END_GAME_MESSAGE = "Game over";
 
     private JButton restart;
     private JButton joinGame;
@@ -117,7 +118,6 @@ public class Canvas extends JFrame {
         board.add(restart);
 
         lobbyName = new JTextField("Enter password");
-        ;
         lobbyName.setBounds(25, 425, (CANVAS_WIDTH - BOARD_SIZE) - 50, 25);
         lobbyName.setEnabled(true);
         //restart.addActionListener(new Restart());
@@ -279,6 +279,9 @@ public class Canvas extends JFrame {
         highlight.clear();
         selected = null;
         possibleMoves.clear();
+        Util.closeSocket(peer);
+        peer = null;
+        closeViewers();
     }
 
     private Draught readDraught(InputStream is, boolean isWhite) throws IOException {
@@ -410,16 +413,26 @@ public class Canvas extends JFrame {
         return x >= 0 && x < CELLS_NUMBER && y >= 0 && y < CELLS_NUMBER;
     }
 
-    private boolean finished() throws IOException {
+    private void closeViewers() {
+        for (Socket viewer : newViewers)
+            Util.closeSocket(viewer);
+        newViewers.clear();
+        for (Socket viewer : viewers)
+            Util.closeSocket(viewer);
+        viewers.clear();
+    }
+
+    private boolean finished() {
         if (me.isEmpty()) {
             gameState = 0;
             statusLabel.setText(OPPONENTS_WIN_MESSAGE);
             createGame.setEnabled(false);
             joinGame.setEnabled(false);
             restart.setEnabled(true);
-            if (!peer.isClosed())
-                peer.close();
+            watchGame.setEnabled(true);
+            Util.closeSocket(peer);
             peer = null;
+            closeViewers();
             return true;
         }
 
@@ -429,9 +442,10 @@ public class Canvas extends JFrame {
             createGame.setEnabled(false);
             joinGame.setEnabled(false);
             restart.setEnabled(true);
-            if (!peer.isClosed())
-                peer.close();
+            watchGame.setEnabled(true);
+            Util.closeSocket(peer);
             peer = null;
+            closeViewers();
             return true;
         }
 
@@ -518,6 +532,37 @@ public class Canvas extends JFrame {
         os.write(Util.intToByte(draught.getY()));
     }
 
+    private void getGame() throws IOException {
+        InputStream is = peer.getInputStream();
+        int color = new BigInteger(readBytes(is, 1)).intValue();
+        int move = new BigInteger(readBytes(is, 1)).intValue();
+        int whiteSize = new BigInteger(readBytes(is, 4)).intValue();
+        List<Draught> newWhite = new CopyOnWriteArrayList<Draught>();
+        for (int i = 0; i < whiteSize; ++i) {
+            newWhite.add(readDraught(is, true));
+        }
+        int blackSize = new BigInteger(readBytes(is, 4)).intValue();
+        List<Draught> newBlack = new CopyOnWriteArrayList<Draught>();
+        for (int i = 0; i < blackSize; ++i) {
+            newBlack.add(readDraught(is, false));
+        }
+        white = newWhite;
+        black = newBlack;
+        isWhite = color == 1;
+        isMyMove = move == 1;
+
+    }
+
+    private void initDraughtsSets() {
+        if (isWhite) {
+            me = white;
+            opponent = black;
+        } else {
+            me = black;
+            opponent = white;
+        }
+    }
+
     private class JoinGame implements ActionListener {
 
         @Override
@@ -548,31 +593,9 @@ public class Canvas extends JFrame {
                                     continue;
 
                                 peer = new Socket(packet.getAddress(), TCP_PORT);
-                                InputStream is = peer.getInputStream();
-                                int color = new BigInteger(readBytes(is, 1)).intValue();
-                                int move = new BigInteger(readBytes(is, 1)).intValue();
-                                int whiteSize = new BigInteger(readBytes(is, 4)).intValue();
-                                List<Draught> newWhite = new CopyOnWriteArrayList<Draught>();
-                                for (int i = 0; i < whiteSize; ++i) {
-                                    newWhite.add(readDraught(is, true));
-                                }
-                                int blackSize = new BigInteger(readBytes(is, 4)).intValue();
-                                List<Draught> newBlack = new CopyOnWriteArrayList<Draught>();
-                                for (int i = 0; i < blackSize; ++i) {
-                                    newBlack.add(readDraught(is, false));
-                                }
-                                white = newWhite;
-                                black = newBlack;
-                                isWhite = color == 1;
-                                isMyMove = move == 1;
+                                getGame();
 
-                                if (isWhite) {
-                                    me = white;
-                                    opponent = black;
-                                } else {
-                                    me = black;
-                                    opponent = white;
-                                }
+                                initDraughtsSets();
 
                                 if (isMyMove)
                                     statusLabel.setText(MY_MOVE_MESSAGE);
@@ -642,41 +665,20 @@ public class Canvas extends JFrame {
                                 if (!message.equals(lobbyName.getText()))
                                     continue;
 
+                                statusLabel.setText(WATCH_MESSAGE);
+
                                 peer = new Socket(packet.getAddress(), VIEWER_PORT);
-                                InputStream is = peer.getInputStream();
-                                int color = new BigInteger(readBytes(is, 1)).intValue();
-                                int move = new BigInteger(readBytes(is, 1)).intValue();
-                                int whiteSize = new BigInteger(readBytes(is, 4)).intValue();
-                                List<Draught> newWhite = new CopyOnWriteArrayList<Draught>();
-                                for (int i = 0; i < whiteSize; ++i) {
-                                    newWhite.add(readDraught(is, true));
-                                }
-                                int blackSize = new BigInteger(readBytes(is, 4)).intValue();
-                                List<Draught> newBlack = new CopyOnWriteArrayList<Draught>();
-                                for (int i = 0; i < blackSize; ++i) {
-                                    newBlack.add(readDraught(is, false));
-                                }
-                                white = newWhite;
-                                black = newBlack;
-                                isWhite = color == 1;
-                                isMyMove = move == 1;
+                                getGame();
 
                                 if (isMyMove) {
                                     isWhite = !isWhite;
                                 }
 
-                                if (isWhite) {
-                                    me = white;
-                                    opponent = black;
-                                } else {
-                                    me = black;
-                                    opponent = white;
-                                }
-
-                                statusLabel.setText(WATCH_MESSAGE);
+                                initDraughtsSets();
 
                                 while (true) {
                                     if (finished()) {
+                                        statusLabel.setText(END_GAME_MESSAGE);
                                         return;
                                     }
 
@@ -773,14 +775,7 @@ public class Canvas extends JFrame {
                                     setHighlighted();
                                     possibleMoves.clear();
                                 } catch (Exception e1) {
-                                    try {
-                                        if (!peer.isClosed())
-                                            peer.close();
-                                    } catch (Exception e2) {
-                                        System.err.println(e2.getLocalizedMessage());
-                                    }
                                     handlerError();
-                                    peer = null;
                                     System.err.println(e1.getLocalizedMessage());
                                 }
                             }

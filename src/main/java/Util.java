@@ -1,3 +1,4 @@
+import java.net.Socket;
 import java.nio.ByteBuffer;
 
 public class Util {
@@ -12,5 +13,14 @@ public class Util {
 
     public static byte[] intToByte(int i) {
         return expand(ByteBuffer.allocate(4).putInt(i).array(), 4);
+    }
+
+    public static void closeSocket(Socket socket) {
+        try {
+            if (!socket.isClosed())
+                socket.close();
+        } catch (Exception e2) {
+            System.err.println(e2.getLocalizedMessage());
+        }
     }
 }
