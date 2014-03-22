@@ -140,6 +140,7 @@ public class Canvas extends JFrame {
         createGame.setEnabled(true);
         joinGame.setEnabled(true);
         restart.setEnabled(false);
+        watchGame.setEnabled(true);
         lobbyName.setEnabled(true);
 
         white.clear();
@@ -275,6 +276,7 @@ public class Canvas extends JFrame {
         createGame.setEnabled(true);
         joinGame.setEnabled(true);
         restart.setEnabled(true);
+        watchGame.setEnabled(true);
         lobbyName.setEnabled(true);
         highlight.clear();
         selected = null;
