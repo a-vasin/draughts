@@ -21,8 +21,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Canvas extends JFrame {
 
     private static int CANVAS_WIDTH = 1000;
-    private static int CANVAS_HEIGHT = 800;
+    private static int CANVAS_HEIGHT = 850;
     private static int BOARD_SIZE = 720;
+    private static int EDGE_OFFSET = 20;
     private static int CELLS_NUMBER = 8;
     private static int CELL_SIZE = BOARD_SIZE / CELLS_NUMBER;
     private static float LABEL_FONT_SIZE = 20.0f;
@@ -91,34 +92,34 @@ public class Canvas extends JFrame {
 
         createGame = new JButton("Create game");
         createGame.setFont(createGame.getFont().deriveFont(BUTTON_FONT_SIZE));
-        createGame.setBounds(25, 25, (CANVAS_WIDTH - BOARD_SIZE) - 50, 75);
+        createGame.setBounds(25, 25, (CANVAS_WIDTH - BOARD_SIZE - EDGE_OFFSET) - 50, 75);
         createGame.addActionListener(new CreateGame());
 
         board.add(createGame);
 
         joinGame = new JButton("Join game");
         joinGame.setFont(joinGame.getFont().deriveFont(BUTTON_FONT_SIZE));
-        joinGame.setBounds(25, 125, (CANVAS_WIDTH - BOARD_SIZE) - 50, 75);
+        joinGame.setBounds(25, 125, (CANVAS_WIDTH - BOARD_SIZE - EDGE_OFFSET) - 50, 75);
         joinGame.addActionListener(new JoinGame());
 
         board.add(joinGame);
 
         watchGame = new JButton("Watch game");
         watchGame.setFont(joinGame.getFont().deriveFont(BUTTON_FONT_SIZE));
-        watchGame.setBounds(25, 225, (CANVAS_WIDTH - BOARD_SIZE) - 50, 75);
+        watchGame.setBounds(25, 225, (CANVAS_WIDTH - BOARD_SIZE - EDGE_OFFSET) - 50, 75);
         watchGame.addActionListener(new WatchGame());
 
         board.add(watchGame);
 
         restart = new JButton("Restart");
         restart.setFont(restart.getFont().deriveFont(BUTTON_FONT_SIZE));
-        restart.setBounds(25, 325, (CANVAS_WIDTH - BOARD_SIZE) - 50, 75);
+        restart.setBounds(25, 325, (CANVAS_WIDTH - BOARD_SIZE - EDGE_OFFSET) - 50, 75);
         restart.addActionListener(new Restart());
 
         board.add(restart);
 
         lobbyName = new JTextField("Enter password");
-        lobbyName.setBounds(25, 425, (CANVAS_WIDTH - BOARD_SIZE) - 50, 25);
+        lobbyName.setBounds(25, 425, (CANVAS_WIDTH - BOARD_SIZE - EDGE_OFFSET) - 50, 25);
         lobbyName.setEnabled(true);
         //restart.addActionListener(new Restart());
 
@@ -218,7 +219,7 @@ public class Canvas extends JFrame {
         public void paint(Graphics g) {
             super.paint(g);
 
-            g.drawImage(boardImage.getImage(), CANVAS_WIDTH - BOARD_SIZE, 0, BOARD_SIZE, BOARD_SIZE, this);
+            g.drawImage(boardImage.getImage(), CANVAS_WIDTH - EDGE_OFFSET - BOARD_SIZE, 0, BOARD_SIZE, BOARD_SIZE, this);
 
             drawHighlights(g);
             drawPossibleMoves(g);
@@ -229,21 +230,21 @@ public class Canvas extends JFrame {
         private void drawHighlights(Graphics g) {
             g.setColor(new Color(0, 255, 0, 64));
             for (Draught draught : highlight)
-                g.fillRect(CANVAS_WIDTH - BOARD_SIZE + draught.getX() * CELL_SIZE, draught.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                g.fillRect(CANVAS_WIDTH - EDGE_OFFSET - BOARD_SIZE + draught.getX() * CELL_SIZE, draught.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
 
         private void drawPossibleMoves(Graphics g) {
             g.setColor(new Color(255, 0, 0, 64));
             for (Coordinate coordinate : possibleMoves)
-                g.fillRect(CANVAS_WIDTH - BOARD_SIZE + coordinate.getX() * CELL_SIZE, coordinate.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                g.fillRect(CANVAS_WIDTH - EDGE_OFFSET - BOARD_SIZE + coordinate.getX() * CELL_SIZE, coordinate.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
 
         private void drawDraughts(Graphics g) {
             for (Draught draught : white) {
-                g.drawImage(draught.getImage(), CANVAS_WIDTH - BOARD_SIZE + draught.getX() * CELL_SIZE, draught.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE, this);
+                g.drawImage(draught.getImage(), CANVAS_WIDTH - EDGE_OFFSET - BOARD_SIZE + draught.getX() * CELL_SIZE, draught.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE, this);
             }
             for (Draught draught : black) {
-                g.drawImage(draught.getImage(), CANVAS_WIDTH - BOARD_SIZE + draught.getX() * CELL_SIZE, draught.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE, this);
+                g.drawImage(draught.getImage(), CANVAS_WIDTH - EDGE_OFFSET - BOARD_SIZE + draught.getX() * CELL_SIZE, draught.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE, this);
             }
         }
 
