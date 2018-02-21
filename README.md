@@ -18,4 +18,7 @@ All available actions are highlighted so you won't get confused =)
 
 (Hint: if nothing is highlighted when game is running - it's not your turn)
 
-If all of a sudden you still got confused you can track game status in the bottom of the window.
+If all of a sudden you still got confused you can track game status in the bottom of the window
+
+## Running game
+Please, run game with Java using entry point in Canvas.java
